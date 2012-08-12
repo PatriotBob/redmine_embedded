@@ -138,7 +138,7 @@ class RedmineEmbeddedController < ApplicationController
     end
     
     # Keep html body only
-    @content.gsub!(%r{^.*<body[^>]*>(.*)</body>.*$}mi, '\\1')
+    @content.gsub!(%r{^.*<body([^>]*)>(.*)</body>.*$}mi, '<div\\1>\\2</div>')
     
     # Re-encode content if needed
     source_encoding = Setting.plugin_redmine_embedded['encoding'].to_s
