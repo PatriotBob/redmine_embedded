@@ -7,3 +7,13 @@
 <% html_title(@title) if @title %>
 
 <% asset_include_tags(@doc_template) %>
+
+<% 
+	@headjs.each do |js|
+		content_for(:header_tags) { javascript_include_tag(@base_path + js[0]) }
+	end
+	
+	@headcss.each do |css|
+		content_for(:header_tags) { stylesheet_link_tag(@base_path + css[0]) }
+	end
+%>

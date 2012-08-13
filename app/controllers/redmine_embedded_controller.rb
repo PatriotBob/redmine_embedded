@@ -47,7 +47,13 @@ class RedmineEmbeddedController < ApplicationController
     # Check file extension
     raise RedmineEmbeddedControllerError.new('This file can not be viewed (invalid extension).') unless Redmine::Plugins::RedmineEmbedded.valid_extension?(path)
     
-    if Redmine::MimeType.is_type?('image', path)
+	# Get the base path for script/link urls
+	@base_path = ""
+	if request.fullpath =~ %r{(.*\/)[^\/]+}
+      @base_path = $1
+    end
+	
+    if Redmine::MimeType.is_type?('image', path) || Redmine::MimeType.of(path) == "text/x-javascript" || Redmine::MimeType.of(path) == "text/css"
       send_file path, :disposition => 'inline', :type => Redmine::MimeType.of(path)
     else
       embed_file path
@@ -136,8 +142,11 @@ class RedmineEmbeddedController < ApplicationController
     if @content =~ %r{<title>([^<]*)</title>}mi
       @title = $1.strip
     end
+	
+	@headjs = @content.scan(/<script.+?src="([^"]+)".*?>.*?<\/script>/mi)
+	@headcss = @content.scan(/<link.+?href="([^"]+)".*?\/>/i)
     
-    # Keep html body only
+	# Keep html body only
     @content.gsub!(%r{^.*<body[^>]*>(.*)</body>.*$}mi, '\\1')
     
     # Re-encode content if needed
